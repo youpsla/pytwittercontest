@@ -1,0 +1,303 @@
+from web.core.api import Looper, Conditional
+from web.components.api import *
+
+enamldef TweetsDetails(Table):
+    tag = 'table'
+    cls = 'table'
+    attr tweets_list = []
+
+    Conditional:
+        condition << len(tweets_list) > 0
+        THead:
+            Tr:
+                Th:
+                    attrs = {'scope' : 'col'}
+                    text = "Texte"
+                Th:
+                    attrs = {'scope' : 'col'}
+                    text = "Retweet"
+                Th:
+                    attrs = {'scope' : 'col'}
+                    text = "Vote"
+                Th:
+                    attrs = {'scope' : 'col'}
+                    text = "Date"
+        TBody:
+            Looper:
+                iterable << tweets_list
+                Tr:
+                    Td:
+                        text = loop_item['text']
+                    Td:
+                        text = loop_item['retweet']
+                    Td:
+                        text = loop_item['vote']
+                    Td:
+                        A:
+                            href = f'https://twitter.com/status/{loop_item["id"]}'
+                            target = "_blank"
+                            text = loop_item['date']
+
+
+enamldef SummaryReport(Div):
+    attr summaryreport
+    attr total_votes
+    attr total_retweets
+    attr total_followers
+    attr summary_report_list = []
+
+    Conditional:
+        condition << len(summary_report_list) > 0
+        Looper:
+            iterable << summary_report_list
+            P:
+                text << f'{loop_item["name"]}: {loop_item["nb"]}'
+
+    Button: update_button:
+        type = "button"
+        cls = "btn btn-secondary"
+        text = "Update"
+        id = "update_summary_report"
+        clicked ::
+            print('Update sumamry_report clicked')
+
+
+
+enamldef UpdateFollowers(Div):
+    attr processed = 0
+    cls = 'container'
+    alias update_button
+
+    Div:
+        P:
+            text << f'{processed} followers checked'
+
+        Button: update_button:
+            type = "button"
+            cls = "btn btn-secondary"
+            id = 'update_followers'
+            text = "Update followers"
+            # attrs = {'disabled' : 'False'}
+            clicked ::
+                print('Update followers clicked')
+
+
+enamldef Viewer(Html): viewer:
+    attr request # The tornado request
+    attr response # The tornado response handler
+    attr datas # Datas to load
+    attr loading = False
+    alias tweetsdetails
+    alias summaryreport
+    # alias updatefollowers
+    Head:
+        Title:
+            text = "DEVX twitter contest"
+        Script:
+            src = "https://code.jquery.com/jquery-3.3.1.min.js"
+            type = 'text/javascript'
+        Script:
+            src = "https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            type = 'text/javascript'
+        Script:
+            src = "https://stackpath.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"
+            type = 'text/javascript'
+        Script:
+            src = "https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"
+            type = 'text/javascript'
+        #Script:
+        #     src = "/static/enaml.js"
+        #     type = 'text/javascript'
+        Script:
+            text = '''
+            $(document).ready(function() {
+                console.log('ready');
+
+                initViewer('%s');
+
+                var table = $('#full_table').DataTable( {
+                    rowCallback: function (row, data) {
+                        $(row).addClass('clickable');
+                        },
+                        "ajax": "datas",
+                        "columns": [
+                            { "data": "Name" },
+                            { "data": "Tweets" },
+                            { "data": "Followers" },
+                            { "data": "Retweet",
+                                "defaultContent": "<i>No</i>" },
+                            { "data": "Vote",
+                                "defaultContent": "<i>No</i>" },
+                            { "data": "Follow",
+                                "defaultContent": "<i>No</i>" },
+                            ]
+                        });
+
+                // constructor
+                var Enaml = (function(){
+                    function Enaml() {
+                        this.ws = null;
+                        this.connect();
+                        this.observe();
+                    };
+                    
+                    Enaml.prototype.observe = function() {
+                        var Enaml = this;
+
+                        $('#full_table tbody').on( 'click', 'tr', function (e) {
+                            e.preventDefault();
+                            data = table.row( this ).data();
+                            userid = data['id'];
+                            Enaml.sendEvent({'userid':data['id'], 'event': 'user_tweets'});
+                        });
+
+                        $('#update_summary_report').on( 'click', function (e) {
+                            e.preventDefault();
+                            console.log('Event send: update_summary_report')
+                            Enaml.sendEvent({'event': 'update_summary_report'});
+                        });
+
+                    };
+                    
+                    Enaml.prototype.unobserve = function() {
+                        var Enaml = this;
+                        $('[data-onclick="1"]').off('click');
+                    };
+                
+                    // Define Enaml
+                    Enaml.prototype.onOpen = function(event) {
+                        console.log("On open!");
+                    };
+                    
+                    Enaml.prototype.onMessage = function(event) {
+                        console.log(event);
+                        var change = JSON.parse(event.data);
+                        var $tag = $('[ref="'+change.ref+'"]');
+                        if (change.type==="refresh") {
+                            this.unobserve();
+                            $tag.html(change.value);
+                            this.observe();
+                        } else if (change.type==="trigger") {
+                            $tag.trigger(change.value);
+                        } else if (change.type==="added") {
+                            $tag.append(change.value);
+                        } else if (change.type==="removed") {
+                            $tag.find('[ref="'+change.value+'"]').remove();
+                        } else if (change.type==="update") {
+                            if (change.name==="text") {
+                                var node = $tag.contents().get(0);
+                                if (!node) {
+                                    node = document.createTextNode("");
+                                    $tag.append(node);
+                                }
+                                node.nodeValue = change.value;
+                            // TODO: handle tail
+                            } else if (change.name==="attrs") {
+                                $.map(change.value,function(v,k){
+                                    $tag.prop(k,v);
+                                });
+                            } else {
+                                $tag.prop(change.name,change.value);
+                            }
+                            // Special hack for materialize...
+                            if ($tag.prop('tagName')==='SELECT') {
+                                $tag.material_select();
+                            }
+                        }
+                    };
+                    
+                    Enaml.prototype.connect = function() {
+                        var Enaml = this;
+                        var url = "ws://"+window.location.host+window.location.pathname+"ws";
+                        console.log("Connecting to "+url);
+                        this.ws = new WebSocket(url);
+                        this.ws.onopen = function(e){
+                            Enaml.onOpen(e);
+                        };
+                        this.ws.onmessage = function(e){
+                            Enaml.onMessage(e);
+                        };
+                        this.ws.onclose = function(e){
+                            Enaml.onClose(e);
+                        };
+                    };
+                    
+                    Enaml.prototype.sendEvent = function(event) {
+                        event.viewer_ref = $('html').attr('ref');
+                        console.log('Event');
+                        console.log(event);
+                        this.ws.send(JSON.stringify(event));
+                    };
+                    
+                    Enaml.prototype.onClose = function(event) {
+                        console.log("Connection is closed...");
+                        this.connect();
+                    };
+                    return Enaml;
+                })();
+                
+                window.Enaml = new Enaml();
+
+
+            });
+
+            ''' % viewer.ref
+            type = 'text/javascript'
+        Link:
+            rel="stylesheet"
+            href="//stackpath.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css"
+        Link:
+            rel="stylesheet"
+            href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"
+    Body:
+        cls = 'container'
+        H1:
+            text = 'DevX twitter listing contest'
+        Div:
+            cls = 'row'
+            Div:
+                cls = 'col-3'
+                SummaryReport: summaryreport:
+                    pass
+            Div:
+                cls = 'col-9'
+                Conditional:
+                    # condition << viewer.datas is not None
+                    Table:
+                        id = 'full_table'
+                        cls = 'display'
+                        THead:
+                            Tr:
+                                Th:
+                                    text = 'Name'
+                                Th:
+                                    text = 'Tweets'
+                                Th:
+                                    text = 'Followers'
+                                Th:
+                                    text = 'Retweet' 
+                                Th:
+                                    text = 'Vote' 
+                                Th:
+                                    text = 'Follow' 
+                        TFoot:
+                            Tr:
+                                Th:
+                                    text = 'Name'
+                                Th:
+                                    text = 'Tweets'
+                                Th:
+                                    text = 'Followers'            
+                                Th:
+                                    text = 'Retweet'   
+                                Th:
+                                    text = 'Vote'  
+                                Th:
+                                    text = 'Follow'
+
+                    H3:
+                        text = 'User tweet(s)'
+
+                TweetsDetails: tweetsdetails:
+                    pass
+                        
