@@ -8,7 +8,8 @@ import re
 
 from aiopg.sa import create_engine
 from atomdb.sql import SQLModelManager
-from tweepy import OAuthHandler, Stream, StreamListener, API, Cursor
+from tornado import gen
+from tweepy import API, Cursor, OAuthHandler, Stream, StreamListener
 
 from models import Tweet, User
 
@@ -19,10 +20,10 @@ access_token = os.environ["TWITTER_ACCESS_TOKEN"]
 access_token_secret = os.environ["TWITTER_TOKEN_SECRET"]
 
 USER_SCREEN_NAME = 'clamienne'
-
+VOTE_HASHTAG = "#devianttest"
 
 def is_vote(text):
-    pattern = "^(#devianttest)\s+(\${1}\w+)"
+    pattern = "^(%s)\s+(\${1}\w+)" % (VOTE_HASHTAG)
     m = re.match(pattern, text)
     if m:
         result = m.groups()
@@ -43,7 +44,7 @@ def tdate_to_timestamp(tdate):
     return datetime.datetime.strptime(tdate, "%a %b %d %H:%M:%S +0000 %Y")
 
 
-from tornado import gen
+
 async def get_followers_and_update_db(viewer):
     auth = OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
@@ -102,6 +103,7 @@ async def control_tweet(data):
         mgr.create_tables()
 
         if retweet or vote:
+            # Retrieve or create user
             user, created = await User.objects.get_or_create(id=parsed["user"]["id"])
             if created:
                 user.name = parsed["user"]["name"]
@@ -113,14 +115,33 @@ async def control_tweet(data):
             else:
                 print("user already exist")
 
-            tweet, created = await Tweet.objects.get_or_create(
-                id=parsed["id"],
-                text=parsed["text"],
-                retweet=retweet,
-                vote=vote,
-                created_at=tdate_to_timestamp(parsed["created_at"]),
-                user=user,
-            )
+
+            if vote:
+                tweet, created = await Tweet.objects.get_or_create(
+                    vote=vote,
+                    user=parsed["user"]["id"],
+                )
+
+                if created:
+                    tweet.id=parsed["id"]
+                    tweet.text=parsed["text"]
+                    tweet.retweet=False
+                    tweet.vote=vote
+                    tweet.created_at=tdate_to_timestamp(parsed["created_at"])
+                    tweet.user=user
+                    
+            
+            if retweet:
+                tweet, created = await Tweet.objects.get_or_create(
+                    id=parsed["id"],
+                    text=parsed["text"],
+                    retweet=retweet,
+                    vote=False,
+                    created_at=tdate_to_timestamp(parsed["created_at"]),
+                    user=user,
+                )
+            
+            tweet.save()
 
             print("New tweet created in DB")
 
@@ -150,7 +171,7 @@ def start_tweets_stream():
     auth = OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
     stream = Stream(auth, listener)
-    stream.filter(track=["#bitcoin",])
+    stream.filter(track=["#bitcoin",VOTE_HASHTAG])
 
 
 if __name__ == "__main__":
@@ -159,4 +180,3 @@ if __name__ == "__main__":
     # task = loop.create_task(get_followers_and_update_db())
     # loop.run_until_complete(task)
     # get_followers_and_insert()
-

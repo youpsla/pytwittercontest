@@ -23,12 +23,18 @@ with enaml.imports():
 
 log = tornado.web.app_log
 
+
+# TODO synthèse des votes
+# TODO Control if user has already voted. prevent multi voting
+
+
 # Holds the rendered view so a websocket can retrieve it later
 CACHE = {}
 
 
 class ViewerHandler(tornado.web.RequestHandler):
-    async def get(self):
+
+    async def get(self): # TODO Manage websockets when browser not refreshed
         viewer = Viewer(request=self.request, response=self, datas=[])
         CACHE[viewer.ref] = viewer
         self.write(viewer.render())
@@ -64,8 +70,6 @@ class DatasHandler(tornado.web.RequestHandler):
     async def get(self):
         self.write(json.dumps(self.datas))
         self.datas["data"] = []
-
-
 
 
 class WsHandler(tornado.websocket.WebSocketHandler):

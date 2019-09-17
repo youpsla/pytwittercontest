@@ -44,7 +44,6 @@ function initViewer(ref, table) {
         };
 
         Enaml.prototype.onMessage = function (event) {
-            console.log(event);
             var change = JSON.parse(event.data);
             var $tag = $('[ref="' + change.ref + '"]');
             if (change.type === "refresh") {
