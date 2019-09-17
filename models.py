@@ -35,6 +35,7 @@ class Tweet(SQLModel):
     vote = Bool()
     created_at = Instance(datetime)
     user = Instance(User).tag(nullable=False)
+    coin = Unicode()
 
     class Meta:
         db_table = 'tweet'

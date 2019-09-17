@@ -62,8 +62,10 @@ class DatasHandler(tornado.web.RequestHandler):
                 if True in [i.retweet for i in u.tweets]:
                     tmp_dict["Retweet"] = True
 
-                if True in [i.vote for i in u.tweets]:
-                    tmp_dict["Vote"] = True
+                tmp = [i.coin for i in u.tweets if i.coin != '']
+                print(f'tmp :  {len(tmp)}')
+                if len(tmp) == 1:
+                    tmp_dict["Coin"] = tmp[0]
 
                 self.datas["data"].append(tmp_dict)
 
@@ -86,10 +88,11 @@ class WsHandler(tornado.websocket.WebSocketHandler):
                 tweetslist.append(
                     {
                         "text": t.text,
-                        "vote": str(t.vote),
+                        "coin": str(t.coin),
                         "retweet": str(t.retweet),
                         "date": str(t.created_at),
                         "id": str(t.id),
+                        "user": str(t.user.name)
                     }
                 )
             self.viewer.tweetsdetails.tweets_list = tweetslist

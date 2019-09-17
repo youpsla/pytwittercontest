@@ -18,7 +18,7 @@ enamldef TweetsDetails(Table):
                     text = "Retweet"
                 Th:
                     attrs = {'scope' : 'col'}
-                    text = "Vote"
+                    text = "Coin"
                 Th:
                     attrs = {'scope' : 'col'}
                     text = "Date"
@@ -31,10 +31,10 @@ enamldef TweetsDetails(Table):
                     Td:
                         text = loop_item['retweet']
                     Td:
-                        text = loop_item['vote']
+                        text = loop_item['coin']
                     Td:
                         A:
-                            href = f'https://twitter.com/status/{loop_item["id"]}'
+                            href = f'https://twitter.com/{loop_item["user"]}/status/{loop_item["id"]}'
                             target = "_blank"
                             text = loop_item['date']
 
@@ -124,7 +124,7 @@ enamldef Viewer(Html): viewer:
                             { "data": "Followers" },
                             { "data": "Retweet",
                                 "defaultContent": "<i>No</i>" },
-                            { "data": "Vote",
+                            { "data": "Coin",
                                 "defaultContent": "<i>No</i>" },
                             { "data": "Follow",
                                 "defaultContent": "<i>No</i>" },
@@ -169,7 +169,7 @@ enamldef Viewer(Html): viewer:
                                 Th:
                                     text = 'Retweet' 
                                 Th:
-                                    text = 'Vote' 
+                                    text = 'Coin' 
                                 Th:
                                     text = 'Follow' 
                         TFoot:
@@ -183,7 +183,7 @@ enamldef Viewer(Html): viewer:
                                 Th:
                                     text = 'Retweet'   
                                 Th:
-                                    text = 'Vote'  
+                                    text = 'Coin'  
                                 Th:
                                     text = 'Follow'
 

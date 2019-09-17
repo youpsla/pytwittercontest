@@ -31,13 +31,15 @@ def is_vote(text):
         if result[0] is not None:
             if result[1] is not None:
                 print(f'VOOOOTE {text}')
-                return True
-            return None
+                return (True, result[1])
+    return (None, '')
 
 
 def is_retweet(text):
     pattern = "(RT|rt)( @\w*)?[: ]"
-    return re.match(pattern, text)
+    if re.match(pattern, text):
+        return True
+
 
 
 def tdate_to_timestamp(tdate):
@@ -89,11 +91,7 @@ async def control_tweet(data):
 
     retweet = False
     vote = False
-
-    if is_retweet(parsed["text"]):
-        retweet = True
-    if is_vote(parsed["text"]):
-        vote = True
+    coin = ''
 
     async with create_engine(
         user="youpsla", database="deviant", host="127.0.0.1", password="", port=5433
@@ -102,8 +100,15 @@ async def control_tweet(data):
         mgr.database = engine
         mgr.create_tables()
 
+
+
+        vote, coin = is_vote(parsed["text"])
+        retweet = is_retweet(parsed["text"])
+        print(f'Retweet:{retweet} - Vote:{vote} - Coin{coin}')
+
         if retweet or vote:
             # Retrieve or create user
+            print('enter create user')
             user, created = await User.objects.get_or_create(id=parsed["user"]["id"])
             if created:
                 user.name = parsed["user"]["name"]
@@ -115,20 +120,22 @@ async def control_tweet(data):
             else:
                 print("user already exist")
 
-
             if vote:
-                tweet, created = await Tweet.objects.get_or_create(
-                    vote=vote,
-                    user=parsed["user"]["id"],
-                )
+                # tweet, created = await Tweet.objects.get_or_create(
+                #     vote=vote,
+                #     user=user,
+                # )
 
-                if created:
-                    tweet.id=parsed["id"]
+                tweet1 = await Tweet.objects.get(coin__isnot= None, user = user)
+
+                # if created:
+                if not tweet1:
+                    tweet = Tweet(id=parsed["id"])
                     tweet.text=parsed["text"]
-                    tweet.retweet=False
-                    tweet.vote=vote
                     tweet.created_at=tdate_to_timestamp(parsed["created_at"])
                     tweet.user=user
+                    tweet.coin = coin
+                    await tweet.save(force_insert=True)
                     
             
             if retweet:
@@ -140,8 +147,8 @@ async def control_tweet(data):
                     created_at=tdate_to_timestamp(parsed["created_at"]),
                     user=user,
                 )
+                await tweet.save()
             
-            tweet.save()
 
             print("New tweet created in DB")
 
