@@ -156,7 +156,7 @@ class WsHandler(tornado.websocket.WebSocketHandler):
                     }
                 )
             print(f'tweet list{tweetslist}')
-            CACHE["reference"].tweetsdetails.tweets_list = tweetslist
+            self.viewer.tweetsdetails.tweets_list = tweetslist
 
 
     async def get_summary_report(self):
@@ -225,10 +225,8 @@ class WsHandler(tornado.websocket.WebSocketHandler):
 
     def open(self, *args, **kwargs):
         # Store the viewer in the cache
-        ref = self.request.arguments
-        print(f'REF REF REF : {ref}')
-
-        self.viewer = CACHE['reference']
+        ref = self.get_argument(('ref'))
+        self.viewer = CACHE[ref]
         args = self.open_args
         print('local')
         print(locals().keys())
