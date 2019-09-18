@@ -17,10 +17,9 @@ class User(SQLModel):
     id = Typed(int).tag(type=sa.BigInteger(), primary_key=True)
     name = Unicode()
     screen_name = Unicode()
-    followers_count = Int()
-    statuses_count = Int()
-    lang = Unicode()
-    follower = Bool()
+    followers_count = Int(0)
+    statuses_count = Int(0)
+    follower = Bool(False)
     tweets = Relation(lambda: Tweet)
 
     class Meta:
@@ -31,11 +30,10 @@ class Tweet(SQLModel):
 
     id = Typed(int).tag(type=sa.BigInteger(), primary_key=True)
     text = Unicode()
-    retweet = Bool()
-    vote = Bool()
+    retweet = Bool(False)
     created_at = Instance(datetime)
     user = Instance(User).tag(nullable=False)
-    coin = Unicode()
+    coin = Unicode(default='')
 
     class Meta:
         db_table = 'tweet'

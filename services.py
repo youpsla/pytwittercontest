@@ -87,6 +87,7 @@ async def get_followers_and_update_db(viewer):
             await user.save()
 
 async def control_tweet(data):
+    # TODO Modify retweet control for id instead of regex
     parsed = json.loads(data)
 
     retweet = False
@@ -126,7 +127,7 @@ async def control_tweet(data):
                 #     user=user,
                 # )
 
-                tweet1 = await Tweet.objects.get(coin__isnot= None, user = user)
+                tweet1 = await Tweet.objects.get(coin__gt= '', user = user)
 
                 # if created:
                 if not tweet1:
@@ -143,7 +144,6 @@ async def control_tweet(data):
                     id=parsed["id"],
                     text=parsed["text"],
                     retweet=retweet,
-                    vote=False,
                     created_at=tdate_to_timestamp(parsed["created_at"]),
                     user=user,
                 )

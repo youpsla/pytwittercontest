@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+from collections import Counter
 from functools import reduce
 
 import enaml
@@ -24,7 +25,7 @@ with enaml.imports():
 log = tornado.web.app_log
 
 
-# TODO synthèse des votes
+# TODO synthèse des votes par coin
 # TODO Control if user has already voted. prevent multi voting
 
 
@@ -36,6 +37,19 @@ class ViewerHandler(tornado.web.RequestHandler):
 
     async def get(self): # TODO Manage websockets when browser not refreshed
         viewer = Viewer(request=self.request, response=self, datas=[])
+        
+        tornado.log.gen_log.debug("I'm doing some stuff")
+        tmp_list = []
+        async with create_engine(
+            user="youpsla", database="deviant", host="127.0.0.1", password="", port=5433
+        ) as engine:
+            SQLModelManager.instance().database = engine
+            coins = await Tweet.objects.all()
+            coins_list = Counter([c.coin for c in coins if c.coin != ''])
+            for k,v in coins_list.items():
+                tmp_list.append({'coin': k, 'nb':v})
+            viewer.coinsleaderboard.leaderboard_list = tmp_list
+        
         CACHE[viewer.ref] = viewer
         self.write(viewer.render())
 
@@ -56,14 +70,14 @@ class DatasHandler(tornado.web.RequestHandler):
                 tmp_dict["Tweets"] = u.statuses_count
                 tmp_dict["Followers"] = u.followers_count
                 tmp_dict["id"] = str(u.id)
-                tmp_dict["follow"] = str(u.follower)
+                tmp_dict["Follow"] = u.follower
 
                 u.tweets = await Tweet.objects.filter(user=u.id)
                 if True in [i.retweet for i in u.tweets]:
                     tmp_dict["Retweet"] = True
 
                 tmp = [i.coin for i in u.tweets if i.coin != '']
-                print(f'tmp :  {len(tmp)}')
+                log.debug(f'tmp :  {len(tmp)}')
                 if len(tmp) == 1:
                     tmp_dict["Coin"] = tmp[0]
 
@@ -76,6 +90,21 @@ class DatasHandler(tornado.web.RequestHandler):
 
 class WsHandler(tornado.websocket.WebSocketHandler):
     viewer = None
+
+    # async def get_coins_leaderboard(self):
+    #     tmp_list = []
+    #     async with create_engine(
+    #         user="youpsla", database="deviant", host="127.0.0.1", password="", port=5433
+    #     ) as engine:
+    #         SQLModelManager.instance().database = engine
+    #         coins = await Tweet.objects.all()
+    #         coins_list = Counter([c.coin for c in coins if c.coin != ''])
+    #         print(json.dumps(coins_list))
+    #         for k,v in coins_list.items():
+    #             tmp_list.append({'coin': k, 'nb':v})
+    #         self.viewer.coinsleaderboard.leaderboard_list = tmp_list
+            
+     
 
     async def get_user_tweets(self, userid):
         tweetslist = []
@@ -92,7 +121,7 @@ class WsHandler(tornado.websocket.WebSocketHandler):
                         "retweet": str(t.retweet),
                         "date": str(t.created_at),
                         "id": str(t.id),
-                        "user": str(t.user.name)
+                        "user": str(t.user)
                     }
                 )
             self.viewer.tweetsdetails.tweets_list = tweetslist
@@ -108,27 +137,28 @@ class WsHandler(tornado.websocket.WebSocketHandler):
             followers_count_users_id = [i.id for i in followers]
             print(f"nb followers : {followers_count}")
 
-            votes = await Tweet.objects.filter(vote__is=True)
-            votes_count_users_id = set([i.user for i in votes])
-            votes_count = len(votes_count_users_id)
-            print(f"votes count: {votes_count}")
+            coins = await Tweet.objects.filter(coin__gt='')
+            coins_count_users_id = set([i.user.id for i in coins])
+            coins_count = len(coins_count_users_id)
+            print(f"coins count: {coins_count}")
 
             retweets = await Tweet.objects.filter(retweet__is=True)
-            retweets_count_users_id = set([i.user for i in retweets])
+            retweets_count_users_id = set([i.user.id for i in retweets])
             retweets_count = len(retweets_count_users_id)
             print(f"retweets count: {retweets_count}")
 
             listes = [
                 followers_count_users_id,
-                votes_count_users_id,
+                coins_count_users_id,
                 retweets_count_users_id,
             ]
             total_liste = reduce(set.intersection, [set(l_) for l_ in listes])
+            log.debug(total_liste)
 
             summary_report = [
                 {"name": "Followers", "nb": followers_count},
                 {"name": "Users have retweet", "nb": retweets_count},
-                {"name": "Users haave voted", "nb": votes_count},
+                {"name": "Users haave coined", "nb": coins_count},
                 {"name": "Users qualified", "nb": len(total_liste)},
             ]
 
@@ -186,7 +216,9 @@ def run_web_app():
             (r"/datas", DatasHandler),
             (r"/ws", WsHandler),
             (r"/static/(.*)", StaticFiles, {"path": "static/"}),
-        ]
+        ],
+        debug=True,
+
     )
     app.listen(8888)
 

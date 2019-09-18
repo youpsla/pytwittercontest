@@ -1,6 +1,33 @@
 from web.core.api import Looper, Conditional
 from web.components.api import *
 
+
+
+enamldef CoinsLeaderboard(Table):
+    tag = 'table'
+    cls = 'table'
+    attr leaderboard_list = []
+
+    Conditional:
+        condition << len(leaderboard_list) > 0
+        THead:
+            Tr:
+                Th:
+                    attrs = {'scope' : 'col'}
+                    text = "Coin"
+                Th:
+                    attrs = {'scope' : 'col'}
+                    text = "# Votes"
+        TBody:
+            Looper:
+                iterable << leaderboard_list
+                Tr:
+                    Td:
+                        text = loop_item['coin']
+                    Td:
+                        text = str(loop_item['nb'])
+
+
 enamldef TweetsDetails(Table):
     tag = 'table'
     cls = 'table'
@@ -41,7 +68,7 @@ enamldef TweetsDetails(Table):
 
 enamldef SummaryReport(Div):
     attr summaryreport
-    attr total_votes
+    attr total_coins
     attr total_retweets
     attr total_followers
     attr summary_report_list = []
@@ -89,6 +116,7 @@ enamldef Viewer(Html): viewer:
     attr loading = False
     alias tweetsdetails
     alias summaryreport
+    alias coinsleaderboard
     # alias updatefollowers
     Head:
         Title:
@@ -191,5 +219,10 @@ enamldef Viewer(Html): viewer:
                         text = 'User tweet(s)'
 
                 TweetsDetails: tweetsdetails:
+                    pass
+                Div:
+                    H3:
+                        text = 'Coin leaderboard'
+                CoinsLeaderboard: coinsleaderboard:
                     pass
                         
