@@ -114,6 +114,11 @@ class WsHandler(tornado.websocket.WebSocketHandler):
             SQLModelManager.instance().database = engine
             tweets = await Tweet.objects.filter(user=userid)
             for t in tweets:
+                try:
+                    username = str(t.user.screen_name)
+                except:
+                    username = ''
+
                 tweetslist.append(
                     {
                         "text": t.text,
@@ -121,7 +126,7 @@ class WsHandler(tornado.websocket.WebSocketHandler):
                         "retweet": str(t.retweet),
                         "date": str(t.created_at),
                         "id": str(t.id),
-                        "user": str(t.user)
+                        "user": username
                     }
                 )
             self.viewer.tweetsdetails.tweets_list = tweetslist
