@@ -60,7 +60,7 @@ async def get_followers_and_update_db(viewer):
     print(f'Followers count: {len(ids)}')
 
     async with create_engine(
-        user="youpsla", database="deviant", host="127.0.0.1", password="", port=5433
+        user="youpsla", database="deviant", host="127.0.0.1", password="", port=5432
     ) as engine:
         mgr = SQLModelManager.instance()
         mgr.database = engine
@@ -95,7 +95,7 @@ async def control_tweet(data):
     coin = ''
 
     async with create_engine(
-        user="youpsla", database="deviant", host="127.0.0.1", password="", port=5433
+        user="youpsla", database="deviant", host="127.0.0.1", password="", port=5432
     ) as engine:
         mgr = SQLModelManager.instance()
         mgr.database = engine

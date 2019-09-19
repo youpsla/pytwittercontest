@@ -41,7 +41,7 @@ class ViewerHandler(tornado.web.RequestHandler):
         tornado.log.gen_log.debug("I'm doing some stuff")
         tmp_list = []
         async with create_engine(
-            user="youpsla", database="deviant", host="127.0.0.1", password="", port=5433
+            user="youpsla", database="deviant", host="127.0.0.1", password="", port=5432
         ) as engine:
             SQLModelManager.instance().database = engine
             coins = await Tweet.objects.all()
@@ -60,7 +60,7 @@ class DatasHandler(tornado.web.RequestHandler):
 
     async def prepare(self):
         async with create_engine(
-            user="youpsla", database="deviant", host="127.0.0.1", password="", port=5433
+            user="youpsla", database="deviant", host="127.0.0.1", password="", port=5432
         ) as engine:
             SQLModelManager.instance().database = engine
             users = await User.objects.all()
@@ -94,7 +94,7 @@ class WsHandler(tornado.websocket.WebSocketHandler):
     # async def get_coins_leaderboard(self):
     #     tmp_list = []
     #     async with create_engine(
-    #         user="youpsla", database="deviant", host="127.0.0.1", password="", port=5433
+    #         user="youpsla", database="deviant", host="127.0.0.1", password="", port=5432
     #     ) as engine:
     #         SQLModelManager.instance().database = engine
     #         coins = await Tweet.objects.all()
@@ -109,7 +109,7 @@ class WsHandler(tornado.websocket.WebSocketHandler):
     async def get_user_tweets(self, userid):
         tweetslist = []
         async with create_engine(
-            user="youpsla", database="deviant", host="127.0.0.1", password="", port=5433
+            user="youpsla", database="deviant", host="127.0.0.1", password="", port=5432
         ) as engine:
             SQLModelManager.instance().database = engine
             tweets = await Tweet.objects.filter(user=userid)

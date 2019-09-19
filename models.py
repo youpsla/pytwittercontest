@@ -44,7 +44,7 @@ async def create_db_tables():
                             database='deviant',
                             host='127.0.0.1',
                             password='',
-                            port=5433) as engine:
+                            port=5432) as engine:
         mgr = SQLModelManager.instance()
         mgr.database = engine
         mgr.create_tables()
