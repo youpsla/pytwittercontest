@@ -43,7 +43,7 @@ async def create_db_tables():
     async with create_engine(user='youpsla',
                             database='deviant',
                             host='127.0.0.1',
-                            password='',
+                            password='372010',
                             port=5432) as engine:
         mgr = SQLModelManager.instance()
         mgr.database = engine
