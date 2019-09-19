@@ -9,10 +9,6 @@ import os
 
 from datetime import datetime
 
-if "POSTGRES_URL" not in os.environ:
-    os.environ["POSTGRES_URL"] = "postgresql://youpsla@localhost:5433/deviant"
-DATABASE_URL = os.environ["POSTGRES_URL"]
-
 class User(SQLModel):
     id = Typed(int).tag(type=sa.BigInteger(), primary_key=True)
     name = Unicode()
