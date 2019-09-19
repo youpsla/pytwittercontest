@@ -143,12 +143,12 @@ class WsHandler(tornado.websocket.WebSocketHandler):
             print(f"nb followers : {followers_count}")
 
             coins = await Tweet.objects.filter(coin__gt='')
-            coins_count_users_id = {[i.user.id for i in coins]}
+            coins_count_users_id = {i.user.id for i in coins}
             coins_count = len(coins_count_users_id)
             print(f"coins count: {coins_count}")
 
             retweets = await Tweet.objects.filter(retweet__is=True)
-            retweets_count_users_id = {[i.user.id for i in retweets]}
+            retweets_count_users_id = {i.user.id for i in retweets}
             retweets_count = len(retweets_count_users_id)
             print(f"retweets count: {retweets_count}")
 
