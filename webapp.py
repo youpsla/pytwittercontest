@@ -133,7 +133,7 @@ class WsHandler(tornado.websocket.WebSocketHandler):
 
     async def get_summary_report(self):
         async with create_engine(
-            user="youpsla", database="deviant", host="127.0.0.1", password="", port=5432
+            user="youpsla", database="deviant", host="127.0.0.1", password="372010", port=5432
         ) as engine:
             SQLModelManager.instance().database = engine
 
