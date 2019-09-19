@@ -1,8 +1,4 @@
 function initViewer(ref, table) {
-    //var ws = new WebSocket("ws://localhost:8888/ws/?ref="+ref);
-    // ws.onopen = function(evt) {
-    //     console.log("Connected!");
-    // };
     console.log('initviewer');
 
     console.log(ref);
@@ -81,8 +77,8 @@ function initViewer(ref, table) {
 
         Enaml.prototype.connect = function () {
             var Enaml = this;
-            // var url = "ws://"+window.location.host+window.location.pathname+"ws";
-            var url = "ws://localhost:8888/ws?ref=" + ref
+            var url = "ws://"+window.location.host+window.location.pathname+"ws?ref="+ref;
+            // var url = "ws://localhost:8888/ws?ref=" + ref
             console.log("Connecting to " + url);
             this.ws = new WebSocket(url);
             this.ws.onopen = function (e) {
