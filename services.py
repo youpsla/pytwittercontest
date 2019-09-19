@@ -47,44 +47,7 @@ def tdate_to_timestamp(tdate):
 
 
 
-async def get_followers_and_update_db(viewer):
-    auth = OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_token, access_token_secret)
-    api = API(auth_handler=auth, retry_count=3)
 
-    ids = []
-    # for page in Cursor(api.followers_ids, screen_name="DeviantCoin").pages():
-    for page in Cursor(api.followers_ids, screen_name=USER_SCREEN_NAME).pages():
-        ids.extend(page)
-
-    print(f'Followers count: {len(ids)}')
-
-    async with create_engine(
-        user="youpsla", database="deviant", host="127.0.0.1", password="372010", port=5432
-    ) as engine:
-        mgr = SQLModelManager.instance()
-        mgr.database = engine
-        mgr.create_tables()
-
-        a = 0
-        for i in ids:
-            await gen.sleep(1)
-            a += 1
-            user, created = await User.objects.get_or_create(id=i)
-            asyncio.sleep(1)
-            viewer.updatefollowers.processed = a
-            if created:
-                # u = api.lookup_users(user_ids = [i], include_entities = False)
-                u = api.get_user(i, include_entities = False)
-                u = u
-                user.name = u.name
-                user.screen_name = u.screen_name
-                user.followers_count = u.followers_count
-                user.statuses_count = u.statuses_count
-                user.follower = True
-            else:
-                user.follower = True
-            await user.save()
 
 async def control_tweet(data):
     # TODO Modify retweet control for id instead of regex

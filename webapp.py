@@ -16,7 +16,6 @@ from tornado.ioloop import IOLoop
 from web.core.app import WebApplication
 
 from models import Tweet, User
-from services import get_followers_and_update_db
 
 with enaml.imports():
     from viewer import Viewer
@@ -177,10 +176,10 @@ class WsHandler(tornado.websocket.WebSocketHandler):
             userid = change["userid"]
             await self.get_user_tweets(userid)
 
-        if change["event"] == "update_followers":
-            self.viewer.updatefollowers.update_button.attrs = {"disabled": "True"}
-            await get_followers_and_update_db(self.viewer)
-            del self.viewer.updatefollowers.update_button.attrs
+        # if change["event"] == "update_followers":
+        #     self.viewer.updatefollowers.update_button.attrs = {"disabled": "True"}
+        #     await get_followers_and_update_db(self.viewer)
+        #     del self.viewer.updatefollowers.update_button.attrs
 
         if change["event"] == "update_summary_report":
             await self.get_summary_report()
