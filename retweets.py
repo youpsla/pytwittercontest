@@ -9,7 +9,7 @@ from datetime import datetime
 
 
 USER_SCREEN_NAME = "deviantcoin"
-TWEET_ID = '1174595009674448898'
+TWEET_ID = '1175036755311046656'
 ### Twitter access tokens ###
 consumer_key = os.environ["TWITTER_CONSUMER_KEY"]
 consumer_secret = os.environ["TWITTER_CONSUMER_SECRET"]

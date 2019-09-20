@@ -9,7 +9,7 @@ from models import User
 
 import asyncio
 
-USER_SCREEN_NAME = "deviantcoin"
+USER_SCREEN_NAME = "clamienne"
 ### Twitter access tokens ###
 consumer_key = os.environ["TWITTER_CONSUMER_KEY"]
 consumer_secret = os.environ["TWITTER_CONSUMER_SECRET"]
