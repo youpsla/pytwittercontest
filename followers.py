@@ -17,7 +17,7 @@ access_token = os.environ["TWITTER_ACCESS_TOKEN"]
 access_token_secret = os.environ["TWITTER_TOKEN_SECRET"]
 
 
-mode_production = False
+mode_production = True
 
 
 async def get_followers_and_update_db():
@@ -29,9 +29,9 @@ async def get_followers_and_update_db():
     if mode_production is True:
         for page in Cursor(api.followers_ids, screen_name=USER_SCREEN_NAME).pages():
             twitter_followers.extend(page)
-        with open("test/followers.txt", "x") as f:
-            for t in twitter_followers:
-                f.write(f"{t}\n")
+        #with open("test/followers.txt", "x") as f:
+        #    for t in twitter_followers:
+        #        f.write(f"{t}\n")
     else:
         with open("test/followers.txt", "r") as f:
             for l in f:
@@ -51,7 +51,7 @@ async def get_followers_and_update_db():
         mgr.create_tables()
 
         users_in_db = await User.objects.filter(follower__is=True)
-        ids_in_db = [str(i.id) for i in users_in_db]
+        ids_in_db = [i.id for i in users_in_db]
         users_to_check = [i for i in twitter_followers if i not in ids_in_db]
         print(f"Followers en twitter account: {len(twitter_followers)}")
         print(f"Followers in DB before update: {len(ids_in_db)}")
