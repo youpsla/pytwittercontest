@@ -79,7 +79,14 @@ async def get_followers_and_update_db():
             await user.save()
 
 
+
+
+async def main():
+    while True:
+        await asyncio.sleep(180)
+        await get_followers_and_update_db()
+
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    task = loop.create_task(get_followers_and_update_db())
+    task = loop.create_task(main())
     loop.run_until_complete(task)
