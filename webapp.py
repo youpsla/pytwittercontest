@@ -26,6 +26,9 @@ log = tornado.web.app_log
 
 # TODO synthèse des votes par coin
 # TODO Control if user has already voted. prevent multi voting
+# TODO Implement db regular backup: cron + pg_dump
+# TODO FIx connection when server restart. Wensocket client pull all the time
+# TODO Add "updated_at" field to User. Add observer function column in datatables
 
 
 # Holds the rendered view so a websocket can retrieve it later

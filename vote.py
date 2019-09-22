@@ -29,7 +29,7 @@ def tdate_to_timestamp(tdate):
     return datetime.strptime(tdate, "%a %b %d %H:%M:%S +0000 %Y")
 
 def is_vote(text):
-    pattern = "^(%s)\s+(\${1}\w+)" % (VOTE_HASHTAG)
+    pattern = "(%s)\s+(\${1}\w+)" % (VOTE_HASHTAG)
     m = re.match(pattern, text)
     if m:
         result = m.groups()
