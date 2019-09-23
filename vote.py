@@ -12,7 +12,7 @@ from datetime import datetime
 
 USER_SCREEN_NAME = "deviantcoin"
 VOTE_HASHTAG_1 = '#deviantvotetest'
-VOTE_HASHTAG_2 = '##deviantcointest'
+VOTE_HASHTAG_2 = '#deviantcointest'
 
 ### Twitter access tokens ###
 consumer_key = os.environ["TWITTER_CONSUMER_KEY"]
