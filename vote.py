@@ -31,16 +31,18 @@ def tdate_to_timestamp(tdate):
 
 def is_vote(text):
     pattern = "(%s|%s)\s+(\${1}\w+)" % (VOTE_HASHTAG_1, VOTE_HASHTAG_2)
-    m = re.match(pattern, text)
+    m = re.match(pattern, text, re.IGNORECASE)
     if m:
         result = m.groups()
         if result[0] is not None:
             if result[1] is not None:
+                print(f'Vote detected : {result[1]}')
                 return (True, result[1])
     return (None, '')
 
 async def update_db(data):
     parsed = json.loads(data)
+    print(parsed['text'])
 
     vote, coin = is_vote(parsed["text"])
     if None in [vote, coin]:
