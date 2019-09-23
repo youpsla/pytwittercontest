@@ -97,7 +97,7 @@ def start_tweets_stream():
     auth = OAuthHandler(consumer_key, consumer_secret)
     auth.set_access_token(access_token, access_token_secret)
     stream = Stream(auth, listener)
-    stream.filter(track=[VOTE_HASHTAG])
+    stream.filter(track=[VOTE_HASHTAG_1, VOTE_HASHTAG_2])
 
 
 if __name__ == "__main__":
