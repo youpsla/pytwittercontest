@@ -11,7 +11,8 @@ from datetime import datetime
 
 
 USER_SCREEN_NAME = "deviantcoin"
-VOTE_HASHTAG = '#deviantvotetest'
+VOTE_HASHTAG_1 = '#deviantvotetest'
+VOTE_HASHTAG_2 = '##deviantcointest'
 
 ### Twitter access tokens ###
 consumer_key = os.environ["TWITTER_CONSUMER_KEY"]
@@ -29,7 +30,7 @@ def tdate_to_timestamp(tdate):
     return datetime.strptime(tdate, "%a %b %d %H:%M:%S +0000 %Y")
 
 def is_vote(text):
-    pattern = "(%s)\s+(\${1}\w+)" % (VOTE_HASHTAG)
+    pattern = "(%s|%s)\s+(\${1}\w+)" % (VOTE_HASHTAG_1, VOTE_HASHTAG_2)
     m = re.match(pattern, text)
     if m:
         result = m.groups()
