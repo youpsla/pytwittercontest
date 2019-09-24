@@ -151,11 +151,11 @@ enamldef Viewer(Html): viewer:
                             { "data": "Tweets" },
                             { "data": "Followers" },
                             { "data": "Retweet",
-                                "defaultContent": "<i>No</i>" },
+                                "defaultContent": "&nbsp;" },
                             { "data": "Coin",
-                                "defaultContent": "<i>No</i>" },
+                                "defaultContent": "&nbsp;" },
                             { "data": "Follow",
-                                "defaultContent": "<i>No</i>" },
+                                "defaultContent": "&nbsp;" },
                             ]
                         });
                 
