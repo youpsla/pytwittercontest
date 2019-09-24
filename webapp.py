@@ -27,6 +27,7 @@ log = tornado.web.app_log
 # TODO Implement db regular backup: cron + pg_dump
 # TODO Fix connection when server restart. Wensocket client pull all the time
 # TODO Add "updated_at" field to User. Add observer function column in datatables
+# TODO Look at case for coins leaderboard
 
 
 # Holds the rendered view so a websocket can retrieve it later

@@ -74,7 +74,7 @@ async def update_db(data):
             new_record.text = parsed["text"]
             new_record.created_at = tdate_to_timestamp(parsed["created_at"])
             new_record.user = user
-            new_record.coin = coin
+            new_record.coin = coin.upper()
             await new_record.save(force_insert=True)
 
 
