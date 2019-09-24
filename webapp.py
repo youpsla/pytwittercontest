@@ -80,7 +80,7 @@ class DatasHandler(tornado.web.RequestHandler):
                 tmp = [i.coin for i in u.tweets if i.coin != '']
                 log.debug(f'tmp :  {len(tmp)}')
                 if len(tmp) == 1:
-                    tmp_dict["Coin"] = tmp[0]
+                    tmp_dict["Coin"] = tmp[0].upper()
 
                 self.datas["data"].append(tmp_dict)
 

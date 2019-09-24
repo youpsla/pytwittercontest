@@ -93,7 +93,7 @@ async def update_db():
             for r in retweets_from_twitter
             if r.created_at > last_retweet_from_db.created_at
         ]
-    print(f"{len(new_retweets)} retweets to insert in db")
+    my_logger.debug(f"{len(new_retweets)} retweets to insert in db")
 
     async with create_engine(
         user="youpsla",
@@ -108,6 +108,7 @@ async def update_db():
         for retweet in new_retweets:
             user, created = await User.objects.get_or_create(id=int(retweet.user.id))
             if created:
+                my_logger.debug(f"New User created {retweet.user.screen_name}")
                 user.name = retweet.user.name
                 user.screen_name = retweet.user.screen_name
                 user.followers_count = retweet.user.followers_count
@@ -120,6 +121,7 @@ async def update_db():
             new_record.created_at = retweet.created_at
             new_record.user = user
             new_record.retweet = True
+            my_logger.debug(f"New retweet created {retweet.text}")
             await new_record.save(force_insert=True)
 
 
@@ -130,6 +132,7 @@ async def main():
 
 
 if __name__ == "__main__":
+    my_logger.debug(f"Start script")
     loop = asyncio.get_event_loop()
     task = loop.create_task(main())
     loop.run_until_complete(task)
