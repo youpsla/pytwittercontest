@@ -48,7 +48,7 @@ class ViewerHandler(tornado.web.RequestHandler):
             coins = await Tweet.objects.all()
             coins_list = Counter([c.coin for c in coins if c.coin != ''])
             for k,v in coins_list.items():
-                tmp_list.append({'coin': k, 'nb':v})
+                tmp_list.append({'coin': k.upper(), 'nb':v})
             viewer.coinsleaderboard.leaderboard_list = tmp_list
         
         CACHE[viewer.ref] = viewer
